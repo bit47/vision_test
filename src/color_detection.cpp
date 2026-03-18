@@ -246,7 +246,12 @@ void detectColor(const Mat& image,
     Mat result = drawResult(image,contours,infos,range.drawColor);  
 
     imshow(name + " mask", cleanMask);  
-    imshow(name + " result", result);  
+    imshow(name + " result", result); 
+    if(infos.size() != 0)
+    {
+        imwrite("../img/output/result.jpg",result);
+    } 
+    
 }
 
 int main()  

@@ -193,13 +193,13 @@ void runPipeline(const string& imagePath)
     Mat comparison =
             createComparison(original,list,titles);
 
-    saveImage(gray,"output/grayscale.jpg");
+    saveImage(gray,"../img/output/grayscale.jpg");
 
-    saveImage(blurred,"output/blurred.jpg");
+    saveImage(blurred,"./img/output/blurred.jpg");
 
-    saveImage(equalized,"output/equalized.jpg");
+    saveImage(equalized,"./img/output/equalized.jpg");
 
-    saveImage(comparison,"output/comparison.jpg");
+    saveImage(comparison,"./img/output/comparison.jpg");
 
     cout << "====================================" << endl;
     cout << "预处理流程完成" << endl;
@@ -217,7 +217,7 @@ int main(int argc,char** argv)
     if(argc>1)
         path = argv[1];
     else
-        path = "images/test_image.jpg";
+        path = "/home/ubuntu/cpp/vision_test/img/armor1.png";
 
     runPipeline(path);
 

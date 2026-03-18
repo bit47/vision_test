@@ -1,0 +1,5 @@
+/home/ubuntu/cpp/vision_test/build/CMakeFiles/basic_preprocessing.dir
+/home/ubuntu/cpp/vision_test/build/CMakeFiles/color_detection.dir
+/home/ubuntu/cpp/vision_test/build/CMakeFiles/shape_detection.dir
+/home/ubuntu/cpp/vision_test/build/CMakeFiles/edit_cache.dir
+/home/ubuntu/cpp/vision_test/build/CMakeFiles/rebuild_cache.dir
