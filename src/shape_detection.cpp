@@ -41,18 +41,16 @@ void preprocessForRecognition(
         
     else
     {
-         gray = image.clone();
+        gray = image.clone();
     }
        
     Mat blurred;
-    GaussianBlur(gray, blurred, Size(5,5), 0);
-
-    // 自适应阈值-二值化 
+    GaussianBlur(gray, blurred, Size(5,5),2.0);//第二次更改1.5->2.0
+    // 光照不均:自适应阈值-二值化 
     //参数:输入 输出 最大像素值 
     //阈值计算方式(局部高斯平均) 
-    //反向二值化(使目标为白色背景为黑色) 
     //局部窗口大小(11*11) 
-    //阈值调整常数(用于调节亮度threshold = mean - 2)
+    //阈值调整常数(用于调节亮度threshold = mean - 参数) 
     adaptiveThreshold(
         blurred,
         binary,
@@ -63,11 +61,16 @@ void preprocessForRecognition(
         2
     );
 
-    Canny(blurred, edges, 50, 150);
-//梯度 > 150 → 强边缘
-// 50 < 梯度 <150 → 弱边缘
-// <50 → 非边缘
- }
+//第二次更改:去噪
+Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(3,3));
+morphologyEx(binary, binary, MORPH_OPEN, kernel);
+morphologyEx(binary, binary, MORPH_CLOSE, kernel);
+//第3次更改:50-> 40;100->80
+    Canny(blurred, edges, 40, 80);
+//梯度 > 参数四 → 强边缘
+// 参数三 < 梯度 <参数四 → 弱边缘
+// <参数三 → 非边缘
+}
 
  //根据图形类型返回对应的绘制颜色。
  Scalar getShapeColor(const string& type)
@@ -140,29 +143,29 @@ string classifyShape(
     return "Unknown";
 }
 
+
 //几何图形检测
 vector<ShapeInfo> detectShapes(
         const Mat& image,
         const Mat& binary,
+        const Mat& edges,
         Mat& annotated)//标注图
 {
     cout << "\n开始[几何图形检测]\n";
-//形态学操作
-    Mat morph;
 
-    Mat kernel = Mat::ones(3,3,CV_8U);
-
-    morphologyEx(binary, morph, MORPH_CLOSE, kernel);
 //轮廓检测
     vector<vector<Point>> contours;
+//第三次更改,轮廓闭合处理 
+    Mat closed;
+    Mat close_kernel = getStructuringElement(MORPH_CROSS, Size(2,2));
+    morphologyEx(edges, closed, MORPH_CLOSE, close_kernel,Point(-1,-1),12);
 
     findContours(
-        morph,
+        closed,//3:morph->closed
         contours,
         RETR_EXTERNAL,
-        CHAIN_APPROX_SIMPLE
+        CHAIN_APPROX_SIMPLE 
     );
-
     annotated = image.clone();//创建标注图
 
     vector<ShapeInfo> shapes;
@@ -177,11 +180,11 @@ vector<ShapeInfo> detectShapes(
         double perimeter = arcLength(contours[i], true);//参数:轮廓,是否为闭合曲线
 
         vector<Point> approx;
-        //轮廓近似 参数epsilon = 0.04 * perimeter
+        //轮廓近似 参数epsilon = 0.02 * perimeter
         approxPolyDP(
             contours[i],
             approx,
-            0.04 * perimeter,
+            0.02 * perimeter,
             true
         );
         
@@ -249,6 +252,11 @@ vector<ShapeInfo> detectShapes(
     }
 
     cout<<"检测完成 "<<shapes.size()<<" 个图形\n";
+// //测试
+// imshow("edges",edges);
+// imshow("closed",closed);
+// imshow("annotated",annotated);
+// waitKey(0);
 
     return shapes;
     
@@ -310,6 +318,9 @@ struct DigitInfo
     Rect bbox;
 };
 
+//4:调整画幅进行匹配,防止拉伸导致匹配不成功
+//还不会写
+
 //数字识别,找到所有数字轮廓
 vector<DigitInfo> recognizeDigits(
         const Mat& image,
@@ -341,10 +352,14 @@ vector<DigitInfo> recognizeDigits(
         //筛选有效轮廓,太小的轮廓直接忽略
         if(r.width < 10 || r.height < 20 || area < 100)
             continue;
-        
+
+        //4:改变二值图方向
+        Mat binary_for_digits;
+        bitwise_not(binary, binary_for_digits);
+
 //提取ROI （region of interest）
         //截取数字区域
-        Mat roi = binary(r);
+        Mat roi = binary_for_digits(r);//4:binary->binary_for_digits
 
         //统一尺寸，不然匹配函数无法比较
         resize(roi, roi, Size(50,70));//模板大小 50*70
@@ -434,7 +449,7 @@ void runShapeRecognition(string image_path)
     Mat shape_img;
 
     vector<ShapeInfo> shapes =
-        detectShapes(image, binary, shape_img);
+        detectShapes(image, binary, edges,shape_img);
 
     map<int,Mat> templates =
         createDigitTemplates();
@@ -452,7 +467,7 @@ void runShapeRecognition(string image_path)
 
 int main(int argc,char** argv)
 {
-    string path="../img/output/preprocessor.png";
+    string path="../img/armor1.png";
 
     if(argc>1)
         path=argv[1];
