@@ -190,24 +190,23 @@ void runPipeline(const string& imagePath)
         "Equalized"
     };
 
-    Mat comparison =
-            createComparison(original,list,titles);
+    Mat comparison = createComparison(original,list,titles);
 
     saveImage(gray,"../img/output/grayscale.jpg");
 
-    saveImage(blurred,"./img/output/blurred.jpg");
+    saveImage(blurred,"../img/output/blurred.jpg");
 
-    saveImage(equalized,"./img/output/equalized.jpg");
+    saveImage(equalized,"../img/output/equalized.jpg");
 
-    saveImage(comparison,"./img/output/comparison.jpg");
+    saveImage(comparison,"../img/output/comparison.jpg");
 
     cout << "====================================" << endl;
     cout << "预处理流程完成" << endl;
     cout << "====================================" << endl;
 
     imshow("comparison",comparison);
-
-    waitKey(0);
+    
+    waitKey(0); 
 }
 
 int main(int argc,char** argv)
