@@ -459,8 +459,8 @@ void runShapeRecognition(string image_path)
     vector<DigitInfo> digits =
         recognizeDigits(image, binary, templates, digit_img);
 
-    imwrite("../img/output/shapes.jpg", shape_img);
-    imwrite("../img/output/digits.jpg", digit_img);
+    imwrite("../img/output/shape_detection/shapes.jpg", shape_img);
+    imwrite("../img/output/shape_detection/digits.jpg", digit_img);
 
     cout<<"===== 识别完成 =====\n";
 }

@@ -192,13 +192,13 @@ void runPipeline(const string& imagePath)
 
     Mat comparison = createComparison(original,list,titles);
 
-    saveImage(gray,"../img/output/grayscale.jpg");
+    saveImage(gray,"../img/output/basic_preprocessing/grayscale.jpg");
 
-    saveImage(blurred,"../img/output/blurred.jpg");
+    saveImage(blurred,"../img/output/basic_preprocessing/blurred.jpg");
 
-    saveImage(equalized,"../img/output/equalized.jpg");
+    saveImage(equalized,"../img/output/basic_preprocessing//equalized.jpg");
 
-    saveImage(comparison,"../img/output/comparison.jpg");
+    saveImage(comparison,"../img/output/basic_preprocessing/comparison.jpg");
 
     cout << "====================================" << endl;
     cout << "预处理流程完成" << endl;

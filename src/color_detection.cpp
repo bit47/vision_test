@@ -249,7 +249,7 @@ void detectColor(const Mat& image,
     imshow(name + " result", result); 
     if(infos.size() != 0)
     {
-        imwrite("../img/output/result.jpg",result);
+        imwrite("../img/output/color_detection/result.jpg",result);
     } 
     
 }
