@@ -35,14 +35,9 @@ void preprocessForRecognition(
     Mat gray;
 //转灰度图
     if (image.channels() == 3)
-    {
         cvtColor(image, gray, COLOR_BGR2GRAY);
-    }
-        
     else
-    {
         gray = image.clone();
-    }
        
     Mat blurred;
     GaussianBlur(gray, blurred, Size(5,5),2.0);//第二次更改1.5->2.0
@@ -155,10 +150,10 @@ vector<ShapeInfo> detectShapes(
 
 //轮廓检测
     vector<vector<Point>> contours;
-//第三次更改,轮廓闭合处理 
+//第三次更改,轮廓闭合处理 7:12->10->2 ;6:MORPH_CROSS->MORPH_ELLIPSE
     Mat closed;
-    Mat close_kernel = getStructuringElement(MORPH_CROSS, Size(2,2));
-    morphologyEx(edges, closed, MORPH_CLOSE, close_kernel,Point(-1,-1),12);
+    Mat close_kernel = getStructuringElement(MORPH_ELLIPSE, Size(2,2));
+    morphologyEx(edges, closed, MORPH_CLOSE, close_kernel,Point(-1,-1),2);
 
     findContours(
         closed,//3:morph->closed
@@ -252,11 +247,11 @@ vector<ShapeInfo> detectShapes(
     }
 
     cout<<"检测完成 "<<shapes.size()<<" 个图形\n";
-// //测试
-// imshow("edges",edges);
-// imshow("closed",closed);
-// imshow("annotated",annotated);
-// waitKey(0);
+//测试
+imshow("edges",edges);
+imshow("closed",closed);
+imshow("annotated",annotated);
+waitKey(0);
 
     return shapes;
     
@@ -275,19 +270,22 @@ map<int, Mat> createDigitTemplates()//这名字怎么也这么长...
     //生成0-9的数字模板
     for(int number = 0;number<10;number++)
     {
-        //创建空白图像
+        //创建空黑图像
         Mat temp = Mat::zeros(h,w,CV_8UC1);
         //创建图像内数字
         string text = to_string(number);
-
+        
         int baseline=0;//用于文字排版的基线
         //确定文字位置 参数：内容、字体类型、缩放比例、线宽、*基线（返回字体基线高度
         //返回文字高度和文字宽度
+
+        double fontsize = 3.1;
+
         Size textSize = getTextSize(
                 text,
                 FONT_HERSHEY_SIMPLEX,
-                2,
-                3,
+                fontsize,
+                1,
                 &baseline
         );
         //让文字居中
@@ -299,9 +297,9 @@ map<int, Mat> createDigitTemplates()//这名字怎么也这么长...
             text,
             Point(x,y),
             FONT_HERSHEY_SIMPLEX,
-            2,
+            fontsize, 
             255,
-            3
+            5
         );
         templates[number] = temp;
     }
@@ -318,8 +316,22 @@ struct DigitInfo
     Rect bbox;
 };
 
-//4:调整画幅进行匹配,防止拉伸导致匹配不成功
-//还不会写
+//6:调整画幅进行匹配,防止拉伸导致匹配不成功
+Mat resizeFill(const Mat& src,Size size)
+{
+    Mat dst(size, src.type(),Scalar(0));
+
+    double ratio = min(((double)size.width / src.cols),
+                       ((double)size.height / src.rows));
+    
+    int newH = static_cast<int>(src.rows * ratio);
+    int newW = static_cast<int>(src.cols * ratio);
+     
+    Mat resized;
+    resize(src,resized,Size(newW,newH));
+
+    return resized;
+}
 
 //数字识别,找到所有数字轮廓
 vector<DigitInfo> recognizeDigits(
@@ -353,16 +365,14 @@ vector<DigitInfo> recognizeDigits(
         if(r.width < 10 || r.height < 20 || area < 100)
             continue;
 
-        //4:改变二值图方向
-        Mat binary_for_digits;
-        bitwise_not(binary, binary_for_digits);
 
 //提取ROI （region of interest）
         //截取数字区域
-        Mat roi = binary_for_digits(r);//4:binary->binary_for_digits
+        Mat roi = binary(r);//4:binary->binary_for_digits
 
         //统一尺寸，不然匹配函数无法比较
-        resize(roi, roi, Size(50,70));//模板大小 50*70
+
+        roi = resizeFill(roi,Size(50,70));//模板大小 50*70
 
 //初始化最佳匹配
 
@@ -371,6 +381,10 @@ vector<DigitInfo> recognizeDigits(
 
         for(auto& item:templates)
         {
+// //6:测试：
+// imshow("roi",roi);
+// imshow("template",item.second);
+// waitKey(0);
             Mat result;
 
             matchTemplate(

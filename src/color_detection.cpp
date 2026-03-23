@@ -247,16 +247,24 @@ void detectColor(const Mat& image,
 
     imshow(name + " mask", cleanMask);  
     imshow(name + " result", result); 
+
+string path = "../img/output/color_detection/" + name +"_result.jpg";
+
     if(infos.size() != 0)
     {
-        imwrite("../img/output/color_detection/result.jpg",result);
+        imwrite(path,result);
     } 
     
 }
 
-int main()  
-{  
-    Mat image = imread("../img/armor1.png");  
+int main(int argc,char** argv)  
+{ 
+    string path="../img/armor1.png";
+
+    if(argc>1)
+        path = argv[1];
+
+    Mat image = imread(path);  
   
     if(image.empty())  
     {  
