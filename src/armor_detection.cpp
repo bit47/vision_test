@@ -8,20 +8,6 @@
 using namespace cv;
 using namespace std;
 
-//读取图像
-Mat readImage(const string& image_path)
-{
-    Mat image = imread(image_path);
-
-    if(image.empty())
-    {
-        cout << "[错误] 无法读取图像: " << image_path << endl;
-        return Mat();
-    }
-
-    return image;
-}
-
 struct LightBar {
     Point center;
     float width;
@@ -302,11 +288,16 @@ int main(int argc,char** argv)
     if(argc > 2 && (argv[2] == "blue" || argv[2] == "red"))color = argv[2];
     else
     {
-        cerr<<"dont have the option"<<argv[2]<<endl;
+        cerr<<"[错误]dont have the option"<<argv[2]<<endl;
         return 0;
     }
 
-    Mat img = readImage(image_path);
+    Mat img = imread(image_path);
+    if(img.empty())
+    {
+        cerr<<"[错误]图像读取失败"<<endl;
+        return -1;
+    }
 
     ArmorDetector armorDetector;
 
