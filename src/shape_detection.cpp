@@ -55,6 +55,9 @@ void preprocessForRecognition(
         11,
         2
     );
+//8:测试
+imshow("binary",binary);
+waitKey(0);
 
 //第二次更改:去噪
 Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(3,3));
@@ -247,11 +250,11 @@ vector<ShapeInfo> detectShapes(
     }
 
     cout<<"检测完成 "<<shapes.size()<<" 个图形\n";
-//测试
-imshow("edges",edges);
-imshow("closed",closed);
-imshow("annotated",annotated);
-waitKey(0);
+// //测试
+// imshow("edges",edges);
+// imshow("closed",closed);
+// imshow("annotated",annotated);
+// waitKey(0);
 
     return shapes;
     
@@ -276,11 +279,11 @@ map<int, Mat> createDigitTemplates()//这名字怎么也这么长...
         string text = to_string(number);
         
         int baseline=0;//用于文字排版的基线
-        //确定文字位置 参数：内容、字体类型、缩放比例、线宽、*基线（返回字体基线高度
-        //返回文字高度和文字宽度
-
+        
         double fontsize = 3.1;
 
+                        //确定文字位置 参数：内容、字体类型、缩放比例、线宽、*基线（返回字体基线高度
+                        //返回文字高度和文字宽度
         Size textSize = getTextSize(
                 text,
                 FONT_HERSHEY_SIMPLEX,

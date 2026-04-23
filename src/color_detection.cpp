@@ -245,10 +245,13 @@ void detectColor(const Mat& image,
     
     Mat result = drawResult(image,contours,infos,range.drawColor);  
 
-    imshow(name + " mask", cleanMask);  
-    imshow(name + " result", result); 
+    if(infos.size())
+    {
+        imshow(name + " mask", cleanMask);  
+        imshow(name + " result", result); 
+    }
 
-string path = "../img/output/color_detection/" + name +"_result.jpg";
+    string path = "../img/output/color_detection/" + name +"_result.jpg";
 
     if(infos.size() != 0)
     {
